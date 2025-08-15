@@ -1,38 +1,42 @@
 // C kernel here:
 __attribute__((section(".text"))) void kmain(void);
 
+// Output a character to the VM console
 static inline void vm_putchar(char c) {
-    asm volatile (
-        "mov $0x0E, %%ah \n"   // BIOS teletype function
-        "mov %[ch], %%al \n"   // Character to print
-        "mov $0x0007, %%bx \n" // BH=0 (page 0), BL=07h (light gray on black)
-        "int $0x10      \n"
+    // This uses your VM's OUT Rm instruction (adapt as needed)
+    __asm__ volatile (
+        "movl %0, %%eax\n\t" // Put character in EAX (or whichever register your VM OUT uses)
+        "out"                // OUT instruction in your VM
         :
-        : [ch] "r" (c)
-        : "ax", "bx"
+        : "r"((int)c)
+        : "%eax"
     );
 }
 
-void println(const char* s) {
-    while (*s) vm_putchar(*s++);
+// Print a string
+void print(const char *s) {
+    while (*s) {
+        vm_putchar(*s++);
+    }
 }
 
+// Print a string followed by a newline
+void println(const char *s) {
+    print(s);
+    vm_putchar('\n');
+}
+
+// Kernel entry point
 void kmain(void) {
-    println("Hello from my 32-bit OS!");
-    for (;;) asm("hlt");
+    println("hey this works");
+    println("and this too");
+    for (;;); // Infinite loop
 }
 
-// Boot entry point
-asm(
-".code16\n"            // Ensure assembler treats it as 16-bit code
+// Startup assembly — sets up stack and calls kmain
+__asm__(
 ".global _start\n"
 "_start:\n"
-"    cli\n"
-"    xor %ax, %ax\n"
-"    mov %ax, %ds\n"
-"    mov %ax, %es\n"
-"    mov %ax, %ss\n"
-"    mov $0x9000, %sp\n"   // simple stack
+"    mov $0x90000, %esp\n" // Set stack pointer
 "    call kmain\n"
-"    hlt\n"
-);
+"    halt\n"
