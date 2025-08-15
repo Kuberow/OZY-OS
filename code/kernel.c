@@ -1,16 +1,15 @@
 // C kernel here:
-// Declare kmain so the linker knows where to start
 __attribute__((section(".text"))) void kmain(void);
 
-// Output a character to the VM console
+// VM syscall: output one character
 static inline void vm_putchar(char c) {
-    // This uses your VM's OUT Rm instruction (adapt as needed)
-    __asm__ volatile (
-        "movl %0, %%eax\n\t" // Put character in EAX (or whichever register your VM OUT uses)
-        "out"                // OUT instruction in your VM
+    // Your VM uses "OUT R0" style instruction; we'll pretend the compiler knows it
+    // For your VM, replace this with the opcode manually if needed
+    __asm__ volatile(
+        "movi r0, %0\n\t"
+        "out r0\n"
         :
-        : "r"((int)c)
-        : "%eax"
+        : "r"(c)
     );
 }
 
@@ -21,24 +20,26 @@ void print(const char *s) {
     }
 }
 
-// Print a string followed by a newline
+// Print a string + newline
 void println(const char *s) {
     print(s);
     vm_putchar('\n');
 }
 
-// Kernel entry point
+// Kernel entry
 void kmain(void) {
-    println("hey this works");
-    println("and this too");
-    for (;;); // Infinite loop
+    println("Hello from my 32-bit VM!");
+    println("It stops here.");
+
+    // Halt the VM
+    for(;;) __asm__ volatile("halt"); // infinite halt loop
 }
 
-// Startup assembly — sets up stack and calls kmain
-__asm__(
+// Startup assembly: call kmain
+__asm__ (
 ".global _start\n"
 "_start:\n"
-"    mov $0x90000, %esp\n" // Set stack pointer
+"    mov $0x90000, %sp\n" // simple stack
 "    call kmain\n"
-"    halt\n"
+"    hlt\n"
 );
