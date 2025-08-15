@@ -1,5 +1,5 @@
 // C kernel here:
-attribute((section(".text"))) void kmain(void);
+__attribute__((section(".text"))) void kmain(void);
 
 static inline void vm_putchar(char c) {
     // Replace this with your VM's syscall or console write
@@ -7,7 +7,7 @@ static inline void vm_putchar(char c) {
 }
 
 void println(const char* s) {
-    while (s) vm_putchar(s++);
+    while (*s) vm_putchar(*s++);
 }
 
 void kmain(void) {
