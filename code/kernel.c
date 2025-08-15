@@ -28,8 +28,7 @@ void println(const char *s) {
 
 // Kernel entry point
 void kmain(void) {
-    println("hey this works");
-    println("and this too");
+    print("works\n")
     for (;;); // Infinite loop
 }
 
