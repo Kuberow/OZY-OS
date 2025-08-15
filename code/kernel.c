@@ -1,4 +1,5 @@
 // C kernel here:
+// Declare kmain so the linker knows where to start
 __attribute__((section(".text"))) void kmain(void);
 
 // Output a character to the VM console
@@ -28,7 +29,8 @@ void println(const char *s) {
 
 // Kernel entry point
 void kmain(void) {
-    print("works\n")
+    println("hey this works");
+    println("and this too");
     for (;;); // Infinite loop
 }
 
@@ -39,3 +41,4 @@ __asm__(
 "    mov $0x90000, %esp\n" // Set stack pointer
 "    call kmain\n"
 "    halt\n"
+);
