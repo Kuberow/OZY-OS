@@ -1,6 +1,5 @@
--- Virtual cpu here:
--- 32-bit Virtual CPU Emulator - Fixed Instruction Decoding
--- Corrected register field extraction
+-- 32-bit Virtual CPU Emulator - Clean Version
+-- No debug output, minimal printing
 
 local bit32 = bit32 or require("bit32")
 if not bit32 then
@@ -13,7 +12,6 @@ local memory = {}
 local pc = 0
 local sp = 0x100000
 local running = false
-local debug_mode = true
 
 -- Initialize memory
 for i = 0, 0xFFFFF do memory[i] = 0 end
@@ -31,6 +29,7 @@ local INSTRUCTIONS = {
     [0x09] = "BNE",   -- BNE addr
     [0x0A] = "PUSH",  -- PUSH Rm
     [0x0B] = "POP",   -- POP Rd
+    [0xFE] = "OUT",   -- OUT Rm (output register)
     [0xFF] = "HALT"   -- HALT
 }
 
@@ -74,11 +73,6 @@ function load_program(instructions, start_addr)
     pc = start_addr
     sp = 0x100000
     running = true
-    
-    if debug_mode then
-        print("Program loaded at address 0x" .. string.format("%X", start_addr))
-        print("First instruction: 0x" .. string.format("%X", read32(start_addr)))
-    end
 end
 
 -- Execute one instruction
@@ -97,15 +91,9 @@ function step()
     local opcode = bit32.rshift(instruction, 24)
     local rd = bit32.band(bit32.rshift(instruction, 20), 0xF)
     local rn = bit32.band(bit32.rshift(instruction, 16), 0xF)
-    local rm = bit32.band(bit32.rshift(instruction, 12), 0xF)  -- Fixed: extract from bits 15:12
-    local imm = bit32.band(instruction, 0xFFF)  -- Fixed: 12-bit immediate
-    local addr = bit32.band(instruction, 0xFFFFFF)  -- 24-bit address for branches
-    
-    if debug_mode then
-        local op_name = INSTRUCTIONS[opcode] or "UNKNOWN"
-        print(string.format("PC:0x%08X | OP:0x%02X (%s) | R%d, R%d, R%d | IMM:0x%03X | ADDR:0x%06X", 
-              pc, opcode, op_name, rd, rn, rm, imm, addr))
-    end
+    local rm = bit32.band(bit32.rshift(instruction, 12), 0xF)
+    local imm = bit32.band(instruction, 0xFFF)
+    local addr = bit32.band(instruction, 0xFFFFFF)
     
     -- Move to next instruction
     pc = pc + 4
@@ -146,6 +134,9 @@ function step()
         registers[rd] = read32(sp)
         sp = sp + 4
         
+    elseif opcode == 0xFE then -- OUT Rm
+        print(registers[rm])  -- Only output when OUT instruction is used
+        
     elseif opcode == 0xFF then -- HALT
         running = false
         return true, "HALT instruction"
@@ -175,16 +166,6 @@ function run(max_instructions)
             break
         end
     end
-    
-    if debug_mode then
-        print("\nExecution completed after " .. instruction_count .. " instructions")
-        print("Final register state:")
-        for i = 0, 7 do
-            print("R" .. i .. ": 0x" .. string.format("%08X", registers[i]))
-        end
-        print("PC: 0x" .. string.format("%X", pc))
-        print("SP: 0x" .. string.format("%X", sp))
-    end
 end
 
 -- Helper function to create instructions
@@ -197,9 +178,9 @@ function make_instruction(opcode, rd, rn, rm, imm_or_addr)
     return instr
 end
 
--- Create a simple test program
-local function test_program()
-    -- Program that calculates 5 + 3 and stores the result
+-- Example program that outputs the result
+local function example_program()
+    -- Program that calculates 5 + 3 and outputs the result
     local program = {
         -- MOVI R0, 5
         make_instruction(0x04, 0, 0, 0, 5),
@@ -207,16 +188,15 @@ local function test_program()
         make_instruction(0x04, 1, 0, 0, 3),
         -- ADD R2, R0, R1
         make_instruction(0x01, 2, 0, 1, 0),
+        -- OUT R2
+        make_instruction(0xFE, 0, 0, 2, 0),
         -- HALT
         make_instruction(0xFF, 0, 0, 0, 0)
     }
     
-    print("Running test program (5 + 3)...")
     load_program(program, 0)
     run(10)
-    
-    print("\nResult: R2 = " .. registers[2] .. " (should be 8)")
 end
 
--- Run the test
-test_program()
+-- Run the example
+example_program()
