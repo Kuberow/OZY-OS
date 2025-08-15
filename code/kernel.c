@@ -2,8 +2,15 @@
 __attribute__((section(".text"))) void kmain(void);
 
 static inline void vm_putchar(char c) {
-    // Replace this with your VM's syscall or console write
-    asm volatile ("int $0x10" : : "a"(0x0E00 | c));
+    asm volatile (
+        "mov $0x0E, %%ah \n"   // BIOS teletype function
+        "mov %[ch], %%al \n"   // Character to print
+        "mov $0x0007, %%bx \n" // BH=0 (page 0), BL=07h (light gray on black)
+        "int $0x10      \n"
+        :
+        : [ch] "r" (c)
+        : "ax", "bx"
+    );
 }
 
 void println(const char* s) {
@@ -12,10 +19,12 @@ void println(const char* s) {
 
 void kmain(void) {
     println("Hello from my 32-bit OS!");
-    for(;;) asm("hlt");
+    for (;;) asm("hlt");
 }
 
+// Boot entry point
 asm(
+".code16\n"            // Ensure assembler treats it as 16-bit code
 ".global _start\n"
 "_start:\n"
 "    cli\n"
@@ -23,7 +32,7 @@ asm(
 "    mov %ax, %ds\n"
 "    mov %ax, %es\n"
 "    mov %ax, %ss\n"
-"    mov $0x90000, %sp\n"   // simple stack
+"    mov $0x9000, %sp\n"   // simple stack
 "    call kmain\n"
 "    hlt\n"
 );
