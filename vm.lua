@@ -1,5 +1,5 @@
--- 32-bit Virtual CPU Emulator - Clean Version
--- No debug output, minimal printing
+-- 32-bit Virtual CPU Emulator with File Support
+-- Usage: "virtualcpu [filename.bin]" or just "virtualcpu" for example
 
 local bit32 = bit32 or require("bit32")
 if not bit32 then
@@ -135,7 +135,7 @@ function step()
         sp = sp + 4
         
     elseif opcode == 0xFE then -- OUT Rm
-        print(registers[rm])  -- Only output when OUT instruction is used
+        print(registers[rm])
         
     elseif opcode == 0xFF then -- HALT
         running = false
@@ -178,6 +178,32 @@ function make_instruction(opcode, rd, rn, rm, imm_or_addr)
     return instr
 end
 
+-- Load program from binary file
+function load_program_from_file(filename)
+    local file = io.open(filename, "rb")
+    if not file then
+        error("Could not open file: " .. filename)
+    end
+    
+    local program = {}
+    local data = file:read("*all")
+    file:close()
+    
+    -- Convert binary data to 32-bit instructions (big-endian)
+    for i = 1, #data, 4 do
+        local b1, b2, b3, b4 = data:byte(i, i+3)
+        local instruction = bit32.bor(
+            bit32.lshift(b1, 24),
+            bit32.lshift(b2, 16),
+            bit32.lshift(b3, 8),
+            b4
+        )
+        table.insert(program, instruction)
+    end
+    
+    return program
+end
+
 -- Example program that outputs the result
 local function example_program()
     -- Program that calculates 5 + 3 and outputs the result
@@ -195,8 +221,18 @@ local function example_program()
     }
     
     load_program(program, 0)
-    run(10)
+    run()
 end
 
--- Run the example
-example_program()
+-- Main execution
+local args = {...}
+if #args > 0 then
+    -- Load and run binary file
+    local filename = args[1]
+    local program = load_program_from_file(filename)
+    load_program(program, 0)
+    run()
+else
+    -- Run example program
+    example_program()
+end
