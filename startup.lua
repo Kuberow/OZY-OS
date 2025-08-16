@@ -1,10 +1,11 @@
-local cpu = require("vm")
+local bit = bit32 or require("bit")
+local cpu = require("ARMvCPU")
 cpu:init()
 
 -- Syscall 0 = putchar
 cpu:registerSyscall(0, function(self)
     local ch = self.registers[0] or 0
-    io.write(string.char(ch & 0xFF))
+    io.write(string.char(bit.band(ch, 0xFF)))
 end)
 
 cpu:loadBinary("kernel.bin", 0x0)
