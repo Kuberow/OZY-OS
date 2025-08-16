@@ -53,23 +53,41 @@ function ARMvCPU:write32(addr, value)
 end
 
 function ARMvCPU:checkCondition(cond)
-    if cond == 0x0 then return self.flags.Z end
-    elseif cond == 0x1 then return not self.flags.Z end
-    elseif cond == 0x2 then return self.flags.C end
-    elseif cond == 0x3 then return not self.flags.C end
-    elseif cond == 0x4 then return self.flags.N end
-    elseif cond == 0x5 then return not self.flags.N end
-    elseif cond == 0x6 then return self.flags.V end
-    elseif cond == 0x7 then return not self.flags.V end
-    elseif cond == 0x8 then return self.flags.C and not self.flags.Z end
-    elseif cond == 0x9 then return not (self.flags.C and not self.flags.Z) end
-    elseif cond == 0xA then return self.flags.N == self.flags.V end
-    elseif cond == 0xB then return self.flags.N ~= self.flags.V end
-    elseif cond == 0xC then return not self.flags.Z and (self.flags.N == self.flags.V) end
-    elseif cond == 0xD then return self.flags.Z or (self.flags.N ~= self.flags.V) end
-    elseif cond == 0xE then return true end
-    else return false end
+    if cond == 0x0 then
+        return self.flags.Z
+    elseif cond == 0x1 then
+        return not self.flags.Z
+    elseif cond == 0x2 then
+        return self.flags.C
+    elseif cond == 0x3 then
+        return not self.flags.C
+    elseif cond == 0x4 then
+        return self.flags.N
+    elseif cond == 0x5 then
+        return not self.flags.N
+    elseif cond == 0x6 then
+        return self.flags.V
+    elseif cond == 0x7 then
+        return not self.flags.V
+    elseif cond == 0x8 then
+        return self.flags.C and not self.flags.Z
+    elseif cond == 0x9 then
+        return not (self.flags.C and not self.flags.Z)
+    elseif cond == 0xA then
+        return self.flags.N == self.flags.V
+    elseif cond == 0xB then
+        return self.flags.N ~= self.flags.V
+    elseif cond == 0xC then
+        return not self.flags.Z and (self.flags.N == self.flags.V)
+    elseif cond == 0xD then
+        return self.flags.Z or (self.flags.N ~= self.flags.V)
+    elseif cond == 0xE then
+        return true
+    else
+        return false
+    end
 end
+
 
 function ARMvCPU:shiftOperand(operand, shiftType, shiftAmount)
     local result = operand
