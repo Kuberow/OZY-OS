@@ -1,6 +1,9 @@
 -- ARM Virtual CPU for CC:Tweaked (Clean Version)
 local bit = bit32 or require("bit")
-
+local function ror(value, n)
+    n = n % 32
+    return bit.bor(bit.rshift(value, n), bit.lshift(value, 32 - n))
+end
 local ARMvCPU = {
     registers = {},
     memory = {},
@@ -160,7 +163,8 @@ function ARMvCPU:step()
         if I then
             local immVal = bit.band(imm, 0xFF)
             local rotate = bit.band(bit.rshift(imm, 8), 0xF)
-            op2 = bit.ror(immVal, rotate * 2)
+            result = ror(operand, shiftAmount)
+
         else
             local shiftType = bit.band(bit.rshift(instr, 5), 0x3)
             local shiftAmount
