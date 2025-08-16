@@ -1,5 +1,5 @@
 local bit = bit32 or require("bit")
-local cpu = require("ARMvCPU")
+local cpu = require("vm")
 cpu:init()
 
 -- Syscall 0 = putchar
