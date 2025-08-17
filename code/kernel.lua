@@ -55,5 +55,8 @@ f()
   end
 end
 
+running = true
 print("Running in admin mode!")
 main("admin")
+term.clear()
+os.shutdown()
