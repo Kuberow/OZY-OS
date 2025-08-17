@@ -1,54 +1,82 @@
-# c2bf.py - toy C -> Brainfuck translator
-# Features: main(), putchar('X'), getchar(), user functions
-# Writes output to file specified as argv[2]
-
+# c2bf_expr.py - C->BF translator with variables and char expressions
 import sys, re
 
-def char_to_bf(ch: str) -> str:
-    """Generate BF to print a character"""
-    ascii_val = ord(ch)
-    return "+" * ascii_val + "."
+# Map variable names to BF tape cells
+var_cells = {}
+next_cell = 0
 
-def parse_function(src: str):
-    """Extract function name and body"""
-    match = re.match(r"\s*(?:int|void)\s+(\w+)\s*\(\)\s*{([^}]*)}", src, re.S)
-    if match:
-        return match.group(1), match.group(2)
-    return None, None
+def get_cell(var):
+    global next_cell
+    if var not in var_cells:
+        var_cells[var] = next_cell
+        next_cell += 1
+    return var_cells[var]
 
-def translate_body(body: str, funcs: dict) -> str:
+def move_ptr(current, target):
+    if target > current:
+        return ">" * (target - current)
+    elif target < current:
+        return "<" * (current - target)
+    return ""
+
+def set_var_from_expr(var, expr, current_ptr):
+    """Handle expressions like 'b' + 'h' + getchar() + another_var"""
+    cell = get_cell(var)
+    bf = move_ptr(current_ptr, cell) + "[-]"  # clear target cell
+    current_ptr = cell
+
+    # split expr by '+' and remove spaces
+    terms = [t.strip() for t in expr.split('+')]
+    for term in terms:
+        # constant character
+        m = re.match(r"'(.)'", term)
+        if m:
+            bf += "+" * ord(m.group(1))
+        # getchar()
+        elif term == "getchar()":
+            bf += ","  # read input and add to cell
+        # another variable
+        else:
+            vcell = get_cell(term)
+            # move to temp cell, copy value and add (simplified, adds directly to target)
+            bf += move_ptr(current_ptr, vcell) + "[->+" + "<"*(current_ptr - vcell) + "]"
+            bf += move_ptr(vcell, current_ptr)
+    return bf, current_ptr
+
+def parse_line(line, current_ptr):
+    line = line.strip()
     bf = ""
-    # handle putchar
-    for call in re.finditer(r"putchar\('(.)'\);", body):
-        bf += char_to_bf(call.group(1))
-    # handle getchar
-    if "getchar();" in body:
-        bf += ","
-    # handle function calls
-    for f in funcs:
-        if re.search(rf"\b{f}\s*\(\s*\)\s*;", body):
-            bf += funcs[f]  # inline expansion
+
+    # putchar(var)
+    m = re.match(r"putchar\((\w+)\);", line)
+    if m:
+        var = m.group(1)
+        cell = get_cell(var)
+        bf += move_ptr(current_ptr, cell) + "."
+        current_ptr = cell
+        return bf, current_ptr
+
+    # assignment: var = expr;
+    m = re.match(r"(\w+)\s*=\s*(.*);", line)
+    if m:
+        var, expr = m.group(1), m.group(2)
+        bf_chunk, current_ptr = set_var_from_expr(var, expr, current_ptr)
+        bf += bf_chunk
+        return bf, current_ptr
+
+    return "", current_ptr
+
+def compile_c_to_bf(src):
+    bf = ""
+    current_ptr = 0
+    for line in src.splitlines():
+        chunk, current_ptr = parse_line(line, current_ptr)
+        bf += chunk
     return bf
-
-def compile_c_to_bf(src: str) -> str:
-    funcs = {}
-    # find all functions
-    for func_src in re.findall(r"(?:int|void)\s+\w+\s*\(\)\s*{[^}]*}", src, re.S):
-        name, body = parse_function(func_src)
-        if name and body:
-            funcs[name] = ""  # placeholder
-    
-    # fill function bodies
-    for func_src in re.findall(r"(?:int|void)\s+\w+\s*\(\)\s*{[^}]*}", src, re.S):
-        name, body = parse_function(func_src)
-        if name and body:
-            funcs[name] = translate_body(body, funcs)
-
-    return funcs.get("main", "")
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("Usage: python3 c2bf.py input.c output.bf")
+        print("Usage: python3 c2bf_expr.py input.c output.bf")
         sys.exit(1)
 
     input_file = sys.argv[1]
