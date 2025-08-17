@@ -1,0 +1,8 @@
+shell.run("wget", "https://raw.github.com/Kuberow/OZY-OS-Lite/main/code/kernel.lua", "kernel.lua")
+shell.run("wget", "https://raw.github.com/Kuberow/OZY-OS-Lite/main/code/bootloader/main.lua", "startup.lua")
+print("Core Installed.")
+sleep(2)
+fs.makeDir("bin")
+print("Fully Installed.")
+term.setTextColor(colors.red)
+print("NO COMMANDS ARE AVAILABLE AT THIS TIME!")
