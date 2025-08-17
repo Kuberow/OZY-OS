@@ -1,1 +1,1 @@
-
+shell.run("kernel.lua")
