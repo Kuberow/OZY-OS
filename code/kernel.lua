@@ -1,5 +1,5 @@
-function main(usr, running)
-  while running do
+function main(usr)
+  while true do
     fsloc = fs.getCurrentDir()
     line(colors.white, usr, fsloc)
     cmd = read()
@@ -57,6 +57,6 @@ end
 
 
 print("Running in admin mode!")
-main("admin", true)
+main("admin")
 term.clear()
 os.shutdown()
