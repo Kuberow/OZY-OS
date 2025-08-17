@@ -1,6 +1,6 @@
 function main(usr)
   while true do
-    fsloc = fs.getDir()
+    fsloc = shell.dir()
     line(colors.white, usr, fsloc)
     cmd = read()
     interpret(cmd)
