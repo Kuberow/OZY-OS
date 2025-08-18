@@ -8,7 +8,7 @@ local startTime = os.clock()
 
 -- Boot menu options
 local options = {
-    {name = "Ozy OS", kernel = "Kernel.lua", action = "ozy"},
+    {name = "Ozy OS", kernel = "kernel.lua", action = "ozy"},
     {name = "ComputerCraft OS", action = "computercraft"},
     {name = "Advanced options for Ozy OS", action = "advanced"},
     {name = "System setup", action = "setup"}
