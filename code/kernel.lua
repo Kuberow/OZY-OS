@@ -28,7 +28,7 @@ function interpret(inc)
     local filename = inc  -- your custom executable
 
 -- open the file in binary mode
-local file = fs.open(filename, "rb")
+local file = fs.open(filename, "r")
 if not file then error("Cannot open file: "..filename) end
 
 local content = file.readAll()
