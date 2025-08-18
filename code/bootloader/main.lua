@@ -314,7 +314,7 @@ for _, side in ipairs(peripheral.getNames()) do
                                                                                                                                 print("")
                                                                                                                                 term.setBackgroundColor(colors.black)
                                                                                                                                 term.setTextColor(colors.white)
-                                                                                                                                dofile(option.kernel)
+                                                                                                                                shell.run(option.kernel)
                                                                                                                                 else
                                                                                                                                     print("error: file `" .. option.kernel .. "' not found.")
                                                                                                                                     print("error: you need to load the kernel first.")
