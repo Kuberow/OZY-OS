@@ -24,7 +24,9 @@ function line(c, user, loc)
 end
 
 function interpret(inc)
-  if not inc == "" then
+  if inc == "" then
+  print(" ")
+  else
   if fs.exists(string.match("/bin/"..inc, "^(%S+)")) then
   shell.run("/bin/"..inc)
   else
