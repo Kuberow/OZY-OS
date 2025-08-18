@@ -1,4 +1,4 @@
-OZLE-- Package Manager
+-- Package Manager
 args = {...}
 if args[1] == "install" then
   shell.run("wget https://raw.github.com/Kuberow/OZP/main/Lite/"..args[2]..".lua")
