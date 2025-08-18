@@ -4,6 +4,6 @@ print("Core Installed.")
 sleep(2)
 fs.makeDir("bin")
 shell.run("wget", "https://raw.github.com/Kuberow/OZY-OS-Lite/main/defcmd/help", "/bin/help")
--- shell.run("wget", "https://raw.github.com/Kuberow/OZP/main/defcmd/ozp", "/bin/ozp")
+shell.run("wget", "https://raw.github.com/Kuberow/OZP/main/defcmd/ozp", "/bin/ozp")
 print("Fully Installed.")
 
