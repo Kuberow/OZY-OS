@@ -24,10 +24,12 @@ function line(c, user, loc)
 end
 
 function interpret(inc)
-  if fs.exists("/bin/"..inc) then
+  if not inc == "" then
+  if fs.exists(string.match("/bin/"..inc, "^(%S+)")) then
   shell.run("/bin/"..inc)
   else
     redError("Unknown Command: "..inc)
+  end
   end
 end
 
