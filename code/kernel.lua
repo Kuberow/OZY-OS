@@ -25,31 +25,7 @@ end
 
 function interpret(inc)
   if fs.exists("/bin/"..inc) then
-    local filename = inc  -- your custom executable
-
--- open the file in binary mode
-local file = fs.open(filename, "r")
-if not file then error("Cannot open file: "..filename) end
-
-local content = file.readAll()
-file.close()
-
--- check the header
-local header = string.sub(content, 1, 4)
-if header ~= "OZLE" then
-    term.write("Invalid format: ")
-    if header == "OZEX" then
-    term.write("Not a Lite Format!")
-    end
-end
-
--- get the Lua bytecode part
-local bytecode = string.sub(content, 5)
-
--- load and run the bytecode
-local f, err = load(bytecode)
-if not f then redError("Failed to load executable: "..err) end
-f()
+  shell.run("/bin/"..inc)
   else
     redError("Unknown Command: "..inc)
   end
