@@ -39,4 +39,3 @@ end
 print("Running in admin mode!")
 main("admin")
 term.clear()
-os.shutdown()
