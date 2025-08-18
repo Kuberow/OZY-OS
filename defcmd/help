@@ -1,4 +1,4 @@
-OZLE-- Lite Help command
+-- Lite Help command
 print("Available Commands:")
 for _, item in ipairs(fs.list("/bin/")) do
     print(item)
