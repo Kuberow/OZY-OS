@@ -1,3 +1,4 @@
+os.pullEvent = os.pullEventRaw
 function main(usr)
   while true do
     fsloc = shell.dir()
