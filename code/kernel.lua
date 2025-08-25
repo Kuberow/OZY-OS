@@ -1,4 +1,17 @@
 os.pullEvent = os.pullEventRaw
+args = {...}
+if not args[1] == "skip" then
+local autostartDir = "/autostart/"
+
+if fs.exists(autostartDir) then
+    for _, file in ipairs(fs.list(autostartDir)) do
+        local path = fs.combine(autostartDir, file)
+        if not fs.isDir(path) then
+            shell.run(path)
+        end
+    end
+end
+end
 function main(usr)
   while true do
     fsloc = shell.dir()
