@@ -7,4 +7,5 @@ elseif args[1] == "update" then
   shell.run("wget run https://raw.github.com/Kuberow/OZY-OS/main/install.lua")
 else
   print("Usage: ozp install <package>")
+  print("ozp update")
 end
