@@ -2,6 +2,9 @@
 args = {...}
 if args[1] == "install" then
   shell.run("wget run https://raw.github.com/Kuberow/OZP/main/Lite/"..args[2]..".lua")
+elseif args[1] == "update" then
+  shell.run("rm /kernel.lua")
+  shell.run("wget run https://raw.github.com/Kuberow/OZY-OS/main/install.lua")
 else
   print("Usage: ozp install <package>")
 end
